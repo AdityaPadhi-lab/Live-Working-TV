@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import Hls from "hls.js";
 import "./App.css";
+import { ReactTyped } from "react-typed";
 
 function App() {
   const [channels, setChannels] = useState([]);
@@ -9,17 +10,30 @@ function App() {
   const [currentChannel, setCurrentChannel] = useState(null);
   const [search, setSearch] = useState("");
   const videoRef = useRef(null);
+  const hlsRef = useRef(null);
 
+  // ✅ Fetch channels (safe)
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/channels")
+      .get("https://live-working-tv.onrender.com/api/channels")
       .then((res) => {
-        setChannels(res.data);
-        setFilteredChannels(res.data);
+        if (Array.isArray(res.data)) {
+          setChannels(res.data);
+          setFilteredChannels(res.data);
+        }
       })
-      .catch((err) => console.error("Error fetching channels:", err));
+      .catch((err) => {
+        console.error("Backend error:", err);
+        // fallback data (so UI never blank)
+        const demo = [
+          { name: "Demo Channel", url: "", logo: "" }
+        ];
+        setChannels(demo);
+        setFilteredChannels(demo);
+      });
   }, []);
 
+  // 🔍 Search
   useEffect(() => {
     const filtered = channels.filter((channel) =>
       channel.name.toLowerCase().includes(search.toLowerCase())
@@ -27,20 +41,58 @@ function App() {
     setFilteredChannels(filtered);
   }, [search, channels]);
 
+  // 📺 Video player
   useEffect(() => {
-    if (currentChannel && videoRef.current) {
-      if (Hls.isSupported()) {
-        const hls = new Hls();
-        hls.loadSource(currentChannel.url);
-        hls.attachMedia(videoRef.current);
-      } else {
-        videoRef.current.src = currentChannel.url;
-      }
+    if (!currentChannel || !videoRef.current) return;
+
+    if (hlsRef.current) {
+      hlsRef.current.destroy();
+    }
+
+    if (Hls.isSupported()) {
+      const hls = new Hls();
+      hls.loadSource(currentChannel.url);
+      hls.attachMedia(videoRef.current);
+      hlsRef.current = hls;
+    } else if (videoRef.current.canPlayType("application/vnd.apple.mpegurl")) {
+      videoRef.current.src = currentChannel.url;
     }
   }, [currentChannel]);
 
   return (
     <div className="container">
+
+      {/* 🔥 PROFILE */}
+      <div className="profile">
+        <h2 className="glow">
+          {/* fallback if typed fails */}
+          {ReactTyped ? (
+            <ReactTyped
+              strings={[
+                "Aditya Padhi",
+                "Full Stack Developer",
+                "AI Enthusiast 🚀"
+              ]}
+              typeSpeed={80}
+              backSpeed={40}
+              loop
+            />
+          ) : (
+            "Aditya Padhi"
+          )}
+        </h2>
+
+        <div className="links">
+          <a href="https://github.com/AdityaPadhi-lab" target="_blank" rel="noreferrer">
+            GitHub
+          </a>
+          <a href="https://www.linkedin.com/in/aditya-padhi-7aa941278/" target="_blank" rel="noreferrer">
+            LinkedIn
+          </a>
+        </div>
+      </div>
+
+      {/* 📂 SIDEBAR */}
       <div className="sidebar">
         <div className="searchBox">
           <input
@@ -65,6 +117,7 @@ function App() {
         ))}
       </div>
 
+      {/* 🎬 PLAYER */}
       <div className="player">
         {currentChannel ? (
           <>
