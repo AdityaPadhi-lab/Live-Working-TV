@@ -1,0 +1,57 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #111;
+  color: white;
+}
+
+.container {
+  display: flex;
+  height: 100vh;
+}
+
+.sidebar {
+  width: 30%;
+  overflow-y: scroll;
+  background-color: #1c1c1c;
+  border-right: 1px solid #333;
+}
+
+.channel {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  cursor: pointer;
+  border-bottom: 1px solid #333;
+}
+
+.channel:hover {
+  background-color: #333;
+}
+
+.logo {
+  width: 40px;
+  height: 40px;
+  margin-right: 10px;
+  object-fit: contain;
+}
+
+.player {
+  width: 70%;
+  padding: 20px;
+}
+
+.searchBox {
+  padding: 10px;
+  border-bottom: 1px solid #333;
+}
+
+.searchBox input {
+  width: 100%;
+  padding: 8px;
+  border: none;
+  outline: none;
+  background-color: #222;
+  color: white;
+  border-radius: 5px;
+}
